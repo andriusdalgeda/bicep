@@ -1,5 +1,6 @@
 param parLocation string = resourceGroup().location
 
+
 resource resASGWeb 'Microsoft.Network/applicationSecurityGroups@2024-05-01' = {
   name: 'asg-web'
   location: parLocation
