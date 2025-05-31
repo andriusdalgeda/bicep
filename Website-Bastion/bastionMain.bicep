@@ -107,7 +107,7 @@ resource resNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   }
 }
 
-resource publicIpAddressForBastion 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
+resource resPublicIpAddressForBastion 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
   name: paramPIPName
   location: paramLocation
   sku: {
@@ -119,7 +119,7 @@ resource publicIpAddressForBastion 'Microsoft.Network/publicIPAddresses@2022-01-
 
 }
 
-resource bastionHost 'Microsoft.Network/bastionHosts@2022-01-01' = {
+resource resBastionHost 'Microsoft.Network/bastionHosts@2022-01-01' = {
   name: paramBastionHostName
   location: paramLocation
   sku: {
@@ -137,7 +137,7 @@ resource bastionHost 'Microsoft.Network/bastionHosts@2022-01-01' = {
             id: resourceId('Microsoft.Network/VirtualNetworks/subnets', paramVnetName, paramBastionSubnetName)
           }
           publicIPAddress: {
-            id: publicIpAddressForBastion.id
+            id: resPublicIpAddressForBastion.id
           }
         }
       }
@@ -149,4 +149,4 @@ resource bastionHost 'Microsoft.Network/bastionHosts@2022-01-01' = {
   
 }
 
-output bastionIP string = publicIpAddressForBastion.properties.ipAddress
+output bastionIP string = resPublicIpAddressForBastion.properties.ipAddress
