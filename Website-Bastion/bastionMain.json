@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.1.42791",
-      "templateHash": "7107638098814146225"
+      "templateHash": "11775028936281332223"
     }
   },
   "parameters": {
@@ -37,7 +37,10 @@
     },
     "paramBastionSubnetName": {
       "type": "string",
-      "defaultValue": "AzureBastionSubnet"
+      "defaultValue": "AzureBastionSubnet",
+      "metadata": {
+        "description": "Keep name the same"
+      }
     },
     "paramBastionSubnetPrefix": {
       "type": "string",
@@ -52,7 +55,10 @@
     },
     "paramVMCount": {
       "type": "int",
-      "defaultValue": 2
+      "defaultValue": 2,
+      "metadata": {
+        "description": "Total number of VMs you want to deploy"
+      }
     },
     "paramVMNamePrefix": {
       "type": "string",

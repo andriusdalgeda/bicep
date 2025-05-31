@@ -12,6 +12,7 @@ param paramVMSubnetName string = 'subnet-uks-vm'
 @description('e.g 10.0.1.0/24')
 param paramVMSubnetPrefix string = '10.0.1.0/24'
 
+@description('Keep name the same')
 param paramBastionSubnetName string = 'AzureBastionSubnet'
 param paramBastionSubnetPrefix string = '10.0.2.0/24'
 
@@ -23,10 +24,11 @@ param paramNSGName string = 'nsg-AllowRDP'
 @secure()
 param paramAdminPassword string
 
+@description('Total number of VMs you want to deploy')
 param paramVMCount int = 2
 param paramVMNamePrefix string = 'vm-uks-prod'
 
-////////////////////////////////// bastion & dependecies
+////////////////////////////////// bastion & dependencies
 
 param paramPIPName string = 'pip-global-bastion'
 param paramBastionHostName string = 'bastion-uks-prod'
