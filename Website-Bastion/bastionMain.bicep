@@ -24,6 +24,8 @@ param paramNSGName string = 'nsg-AllowRDP'
 @secure()
 param paramAdminPassword string
 
+param paramAdminUsername string
+
 @description('Total number of VMs you want to deploy')
 param paramVMCount int = 2
 param paramVMNamePrefix string = 'vm-uks-prod'
@@ -42,6 +44,7 @@ module VM 'bastionVM.bicep' = [for i in range(0, paramVMCount): {
     paramSubnetName: paramVMSubnetName
     paramVMNamePrefix: paramVMNamePrefix
     paramVnetName: paramVnetName
+    paramAdminUsername: paramAdminUsername
   }
   dependsOn:[
     resVnet

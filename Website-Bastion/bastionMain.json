@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.1.42791",
-      "templateHash": "16629468045101022585"
+      "templateHash": "5071696303117460545"
     }
   },
   "parameters": {
@@ -52,6 +52,9 @@
     },
     "paramAdminPassword": {
       "type": "securestring"
+    },
+    "paramAdminUsername": {
+      "type": "string"
     },
     "paramVMCount": {
       "type": "int",
@@ -201,6 +204,9 @@
           },
           "paramVnetName": {
             "value": "[parameters('paramVnetName')]"
+          },
+          "paramAdminUsername": {
+            "value": "[parameters('paramAdminUsername')]"
           }
         },
         "template": {
@@ -210,7 +216,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.1.42791",
-              "templateHash": "4591041051364423634"
+              "templateHash": "12083077658823955129"
             }
           },
           "parameters": {
@@ -235,8 +241,7 @@
               }
             },
             "paramAdminUsername": {
-              "type": "string",
-              "defaultValue": "andriusadmin"
+              "type": "string"
             },
             "paramAdminPassword": {
               "type": "securestring"

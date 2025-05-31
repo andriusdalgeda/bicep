@@ -15,7 +15,7 @@ param paramVMNamePrefix string
 param paramVMName string = take('${paramVMNamePrefix}-${newGuid()}',15)
 
 // Admin username & pass
-param paramAdminUsername string = 'andriusadmin'
+param paramAdminUsername string
 
 @secure()
 param paramAdminPassword string
