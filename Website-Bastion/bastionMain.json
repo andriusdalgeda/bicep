@@ -1,0 +1,326 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.36.1.42791",
+      "templateHash": "7107638098814146225"
+    }
+  },
+  "parameters": {
+    "paramLocation": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "paramVnetName": {
+      "type": "string",
+      "defaultValue": "vnet-uks-prod-1"
+    },
+    "paramVnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "e.g 10.0.0.0/16"
+      }
+    },
+    "paramVMSubnetName": {
+      "type": "string",
+      "defaultValue": "subnet-uks-vm"
+    },
+    "paramVMSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.1.0/24",
+      "metadata": {
+        "description": "e.g 10.0.1.0/24"
+      }
+    },
+    "paramBastionSubnetName": {
+      "type": "string",
+      "defaultValue": "AzureBastionSubnet"
+    },
+    "paramBastionSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.2.0/24"
+    },
+    "paramNSGName": {
+      "type": "string",
+      "defaultValue": "nsg-AllowRDP"
+    },
+    "paramAdminPassword": {
+      "type": "securestring"
+    },
+    "paramVMCount": {
+      "type": "int",
+      "defaultValue": 2
+    },
+    "paramVMNamePrefix": {
+      "type": "string",
+      "defaultValue": "vm-uks-prod"
+    },
+    "paramPIPName": {
+      "type": "string",
+      "defaultValue": "pip-global-bastion"
+    },
+    "paramBastionHostName": {
+      "type": "string",
+      "defaultValue": "bastion-uks-prod"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2024-05-01",
+      "name": "[parameters('paramVnetName')]",
+      "location": "[parameters('paramLocation')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('paramVnetPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('paramVMSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('paramVMSubnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('paramNSGName'))]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('paramBastionSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('paramBastionSubnetPrefix')]"
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('paramNSGName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2024-05-01",
+      "name": "[parameters('paramNSGName')]",
+      "location": "[parameters('paramLocation')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "[parameters('paramNSGName')]",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1000,
+              "direction": "Inbound",
+              "sourcePortRanges": [],
+              "destinationPortRanges": [],
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2022-01-01",
+      "name": "[parameters('paramPIPName')]",
+      "location": "[parameters('paramLocation')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static"
+      }
+    },
+    {
+      "type": "Microsoft.Network/bastionHosts",
+      "apiVersion": "2022-01-01",
+      "name": "[parameters('paramBastionHostName')]",
+      "location": "[parameters('paramLocation')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "IpConf",
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('paramVnetName'), parameters('paramBastionSubnetName'))]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('paramPIPName'))]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('paramPIPName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('paramVnetName'))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "VM",
+        "count": "[length(range(0, parameters('paramVMCount')))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}-Deploy-{1}', range(0, parameters('paramVMCount'))[copyIndex()], parameters('paramVMNamePrefix'))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "paramAdminPassword": {
+            "value": "[parameters('paramAdminPassword')]"
+          },
+          "paramSubnetName": {
+            "value": "[parameters('paramVMSubnetName')]"
+          },
+          "paramVMNamePrefix": {
+            "value": "[parameters('paramVMNamePrefix')]"
+          },
+          "paramVnetName": {
+            "value": "[parameters('paramVnetName')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.36.1.42791",
+              "templateHash": "4591041051364423634"
+            }
+          },
+          "parameters": {
+            "parLocation": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]"
+            },
+            "paramVnetName": {
+              "type": "string"
+            },
+            "paramSubnetName": {
+              "type": "string"
+            },
+            "paramVMNamePrefix": {
+              "type": "string"
+            },
+            "paramVMName": {
+              "type": "string",
+              "defaultValue": "[take(format('{0}-{1}', parameters('paramVMNamePrefix'), newGuid()), 15)]",
+              "metadata": {
+                "description": "Limit name to max chars allowed to avoid issues"
+              }
+            },
+            "paramAdminUsername": {
+              "type": "string",
+              "defaultValue": "andriusadmin"
+            },
+            "paramAdminPassword": {
+              "type": "securestring"
+            },
+            "paramvmSize": {
+              "type": "string",
+              "defaultValue": "Standard_D2s_v3",
+              "metadata": {
+                "description": "The size of the VM"
+              }
+            },
+            "paramOSVersion": {
+              "type": "string",
+              "defaultValue": "2022-datacenter-azure-edition",
+              "metadata": {
+                "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
+              }
+            }
+          },
+          "variables": {
+            "paramosDiskType": "Standard_LRS"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2022-05-01",
+              "name": "[format('nic-{0}', parameters('paramVMName'))]",
+              "location": "[parameters('parLocation')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "subnet": {
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('paramVnetName'), parameters('paramSubnetName'))]"
+                      }
+                    }
+                  }
+                ],
+                "enableIPForwarding": false
+              }
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2024-11-01",
+              "name": "[parameters('paramVMName')]",
+              "location": "[parameters('parLocation')]",
+              "properties": {
+                "hardwareProfile": {
+                  "vmSize": "[parameters('paramvmSize')]"
+                },
+                "storageProfile": {
+                  "osDisk": {
+                    "createOption": "FromImage",
+                    "managedDisk": {
+                      "storageAccountType": "[variables('paramosDiskType')]"
+                    }
+                  },
+                  "imageReference": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "[parameters('paramOSVersion')]",
+                    "version": "latest"
+                  }
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', format('nic-{0}', parameters('paramVMName')))]"
+                    }
+                  ]
+                },
+                "osProfile": {
+                  "computerName": "[parameters('paramVMName')]",
+                  "adminUsername": "[parameters('paramAdminUsername')]",
+                  "adminPassword": "[parameters('paramAdminPassword')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', format('nic-{0}', parameters('paramVMName')))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('paramVnetName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "bastionIP": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('paramPIPName')), '2022-01-01').ipAddress]"
+    }
+  }
+}
