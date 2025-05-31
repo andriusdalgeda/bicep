@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.1.42791",
-      "templateHash": "11775028936281332223"
+      "templateHash": "16629468045101022585"
     }
   },
   "parameters": {
@@ -151,7 +151,12 @@
       "apiVersion": "2022-01-01",
       "name": "[parameters('paramBastionHostName')]",
       "location": "[parameters('paramLocation')]",
+      "sku": {
+        "name": "Standard"
+      },
       "properties": {
+        "scaleUnits": 2,
+        "enableShareableLink": true,
         "ipConfigurations": [
           {
             "name": "IpConf",

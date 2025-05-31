@@ -123,6 +123,9 @@ resource bastionHost 'Microsoft.Network/bastionHosts@2022-01-01' = {
     name: 'Standard'
   }
   properties: {
+    scaleUnits: 2
+    enableShareableLink: true
+
     ipConfigurations: [
       {
         name: 'IpConf'
@@ -136,11 +139,11 @@ resource bastionHost 'Microsoft.Network/bastionHosts@2022-01-01' = {
         }
       }
     ]
-    scaleUnits: 2
   }
   dependsOn:[
     resVnet
   ]
+  
 }
 
 output bastionIP string = publicIpAddressForBastion.properties.ipAddress
