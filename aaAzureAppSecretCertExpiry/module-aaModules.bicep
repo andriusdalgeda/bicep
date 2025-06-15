@@ -10,7 +10,7 @@ resource automationAccount 'Microsoft.Automation/automationAccounts@2024-10-23' 
   name: __AutomationAccName
 }
 
-resource symbolicname 'Microsoft.Automation/automationAccounts/powerShell72Modules@2023-11-01' = {
+resource powershellModules 'Microsoft.Automation/automationAccounts/powerShell72Modules@2023-11-01' = {
   location: __Location
   parent: automationAccount
   name: __AAModuleName
