@@ -1,0 +1,1 @@
+https://andriusdalgeda.uk/blog/cicd/AppExpiryEmailReport

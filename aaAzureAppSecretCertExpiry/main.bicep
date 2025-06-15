@@ -1,13 +1,19 @@
 extension microsoftGraphV1
 
 param __Location string = resourceGroup().location
+
+// automation & runbook params
 param __AutomationAccName string = ''
 param __RunbookName string = ''
 param __RunbookDescription string = ''
-param __RunbookUri string = 'https://raw.githubusercontent.com/andriusdalgeda/testRepo/refs/heads/main/test.ps1'
+param __RunbookUri string = 'https://raw.githubusercontent.com/andriusdalgeda/bicep/refs/heads/main/aaAzureAppSecretCertExpiry/main.ps1'
 
+// communication services params
+@description('Globally unique')
 param __CommunicationServiceName string = ''
+@description('Globally unique')
 param __CommunicationServiceEmailName string = ''
+
 param __CommunicationServiceEmailLocation string = 'UK'
 param __SenderAddress string = 'DoNotReply'
 
@@ -15,8 +21,9 @@ param __SenderAddress string = 'DoNotReply'
 var __RoleDefinitionId string = '09976791-48a7-449e-bb21-39d1a415f350'
 
 // graph api permissions 
-param __appRoles array = ['User.Read.All', 'Application.Read.All', 'Directory.Read.All']
+var __appRoles array = ['User.Read.All', 'Application.Read.All', 'Directory.Read.All']
 
+// module loop - ps module and version
 var varAAModules = {
   'Az.Communication':{
       Version                    : '0.6.0'
@@ -110,7 +117,7 @@ resource schedule 'Microsoft.Automation/automationAccounts/schedules@2024-10-23'
   }
 }
 
-resource jobSchedule 'Microsoft.Automation/automationAccounts/jobSchedules@2024-10-23' = {
+resource setSchedule 'Microsoft.Automation/automationAccounts/jobSchedules@2024-10-23' = {
   name: guid(resourceGroup().id)
   parent: automationAcc
   properties: {
@@ -132,7 +139,7 @@ resource emailCommunicationService 'Microsoft.Communication/emailServices@2023-0
   }
 }
 
-resource domain 'Microsoft.Communication/emailServices/domains@2023-04-01' = {
+resource emailDomain 'Microsoft.Communication/emailServices/domains@2023-04-01' = {
   parent: emailCommunicationService
   name: 'AzureManagedDomain'
   location: 'global'
@@ -155,7 +162,7 @@ resource communicationService 'Microsoft.Communication/communicationServices@202
   properties: {
     dataLocation: 'UK'
     linkedDomains: [
-      domain.id
+      emailDomain.id
     ]
   }
 }
@@ -164,7 +171,7 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, automationAcc.id, communicationService.id)
   scope: communicationService
   properties: {
-    // replace with custom role with limited perms - /providers/Microsoft.Authorization/roleDefinitions/09976791-48a7-449e-bb21-39d1a415f350
+    // ideally replace with custom role with limited perms - /providers/Microsoft.Authorization/roleDefinitions/09976791-48a7-449e-bb21-39d1a415f350
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', __RoleDefinitionId)
     principalId: automationAcc.identity.principalId
     principalType: 'ServicePrincipal'
@@ -179,8 +186,11 @@ module appCreateGrantScopesModule 'module-appRoles.bicep' = {
   }
 }
 
+// returns formatted host name needed for script
 output emailEndpoint string = 'https://${communicationService.properties.hostName}'
-output emailSenderDomain string = '${__SenderAddress}@${domain.properties.mailFromSenderDomain}'
+
+// returns formatted sender address needed for script
+output emailSenderDomain string = '${__SenderAddress}@${emailDomain.properties.mailFromSenderDomain}'
 
 
 
