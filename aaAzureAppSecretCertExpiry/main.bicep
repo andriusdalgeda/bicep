@@ -17,7 +17,8 @@ param __CommunicationServiceEmailName string = ''
 param __CommunicationServiceEmailLocation string = 'UK'
 param __SenderAddress string = 'DoNotReply'
 
-// Communication and Email Service Owner
+// Communication and Email Service Owner - highly permissive role but the only default rbac role
+// to-do: create a less permissive role with only right to send via the communication service
 var __RoleDefinitionId string = '09976791-48a7-449e-bb21-39d1a415f350'
 
 // graph api permissions 
