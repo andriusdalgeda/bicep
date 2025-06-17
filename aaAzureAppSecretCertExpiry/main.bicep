@@ -24,7 +24,7 @@ var __RoleDefinitionId string = '09976791-48a7-449e-bb21-39d1a415f350'
 var __appRoles array = ['User.Read.All', 'Application.Read.All', 'Directory.Read.All']
 
 // module loop - ps module and version
-var varAAModules = {
+var __AAModules = {
   'Az.Communication':{
       Version                    : '0.6.0'
   }
@@ -40,7 +40,7 @@ var varAAModules = {
 }
 
 // Loop through varAAModules and install all the listed modules in the 7.2 ps environment
-module addModules 'module-aaModules.bicep' = [for aaModule in items(varAAModules): {
+module moduleAppPSModules 'module-aaModules.bicep' = [for aaModule in items(__AAModules): {
   name: '${aaModule.key}-Deploy'
   params:{
     __AAModuleVersion            : aaModule.value.Version
@@ -51,6 +51,15 @@ module addModules 'module-aaModules.bicep' = [for aaModule in items(varAAModules
     automationAcc
   ]
 }]
+
+// grants managed identity attached to automation account specified roles to the graph app - used to authorise mggraph PS cmdlets
+module moduleGraphAppRoles 'module-graphAppRoles.bicep' = {
+  name: 'appScopeGrantDeploy'
+  params: {
+    __MIId              : automationAcc.identity.principalId
+    __appRoles         : __appRoles
+  }
+}
 
 resource automationAcc 'Microsoft.Automation/automationAccounts@2024-10-23' = {
   name: __AutomationAccName
@@ -175,14 +184,6 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', __RoleDefinitionId)
     principalId: automationAcc.identity.principalId
     principalType: 'ServicePrincipal'
-  }
-}
-
-module appCreateGrantScopesModule 'module-appRoles.bicep' = {
-  name: 'appScopeGrantDeploy'
-  params: {
-    __MIId              : automationAcc.identity.principalId
-    __appRoles         : __appRoles
   }
 }
 
