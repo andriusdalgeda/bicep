@@ -17,12 +17,13 @@ param __CommunicationServiceEmailName string = ''
 param __CommunicationServiceEmailLocation string = 'UK'
 param __SenderAddress string = 'DoNotReply'
 
-// Communication and Email Service Owner - highly permissive role but the only default rbac role
+// contributor role
 // to-do: create a less permissive role with only right to send via the communication service
-var __RoleDefinitionId string = '09976791-48a7-449e-bb21-39d1a415f350'
+var __RoleDefinitionId string = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
 
 // graph api permissions 
 var __appRoles array = ['User.Read.All', 'Application.Read.All', 'Directory.Read.All']
+
 
 // module loop - ps module and version
 var __AAModules = {
@@ -84,10 +85,6 @@ resource automationAcc 'Microsoft.Automation/automationAccounts@2024-10-23' = {
       name: 'Basic'
     }
     }
-
-  tags:{
-    environment:' prod'
-  }
 }
 
 resource runbook 'Microsoft.Automation/automationAccounts/runbooks@2024-10-23' = {
