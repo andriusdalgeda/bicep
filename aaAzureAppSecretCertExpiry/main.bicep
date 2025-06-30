@@ -111,7 +111,7 @@ resource schedule 'Microsoft.Automation/automationAccounts/schedules@2024-10-23'
   properties: {
     frequency: 'Week'
     description: '8AM run every Monday'
-    startTime: '2025-06-16T08:00:00+01:00'
+    startTime: '2025-07-01T08:00:00+01:00'
     expiryTime: '9999-12-31T23:59:00+00:00'
     interval: 1
     timeZone: 'Europe/London'

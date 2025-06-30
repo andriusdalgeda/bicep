@@ -151,7 +151,7 @@ $emailRecipientTo = @(
 )
 
 $message = @{
-	ContentSubject = "Test Email"
+	ContentSubject = "Secret Expiry report"
 	RecipientTo = @($emailRecipientTo)  # Array of email address objects
 	SenderAddress = ""
 	ContentHtml = $body
