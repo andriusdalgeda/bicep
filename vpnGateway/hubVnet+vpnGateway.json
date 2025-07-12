@@ -1,0 +1,342 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.36.177.2456",
+      "templateHash": "7425381292533911041"
+    }
+  },
+  "parameters": {
+    "paramTags": {
+      "type": "object",
+      "defaultValue": {
+        "env": "prod",
+        "region": "uksouth",
+        "iac": "true"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "hubVnet",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "paramHubVnetName": {
+            "value": "vnet-hub-uks-prod"
+          },
+          "paramHubVnetIPRange": {
+            "value": "10.0.0.0/16"
+          },
+          "paramGatewaySubnetRange": {
+            "value": "10.0.1.0/24"
+          },
+          "paramFirewallSubnetRange": {
+            "value": "10.0.2.0/24"
+          },
+          "paramBastionSubnetRange": {
+            "value": "10.0.3.0/24"
+          },
+          "paramLocation": {
+            "value": "[resourceGroup().location]"
+          },
+          "paramTags": {
+            "value": "[parameters('paramTags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.36.177.2456",
+              "templateHash": "17457335347438467078"
+            }
+          },
+          "parameters": {
+            "paramLocation": {
+              "type": "string"
+            },
+            "paramHubVnetName": {
+              "type": "string"
+            },
+            "paramHubVnetIPRange": {
+              "type": "string"
+            },
+            "paramGatewaySubnetRange": {
+              "type": "string"
+            },
+            "paramFirewallSubnetRange": {
+              "type": "string"
+            },
+            "paramBastionSubnetRange": {
+              "type": "string"
+            },
+            "paramTags": {
+              "type": "object"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks",
+              "apiVersion": "2024-07-01",
+              "name": "[parameters('paramHubVnetName')]",
+              "location": "[parameters('paramLocation')]",
+              "properties": {
+                "addressSpace": {
+                  "addressPrefixes": [
+                    "[parameters('paramHubVnetIPRange')]"
+                  ]
+                },
+                "subnets": [
+                  {
+                    "name": "GatewaySubnet",
+                    "properties": {
+                      "addressPrefix": "[parameters('paramGatewaySubnetRange')]"
+                    }
+                  },
+                  {
+                    "name": "AzureFirewallSubnet",
+                    "properties": {
+                      "addressPrefix": "[parameters('paramFirewallSubnetRange')]"
+                    }
+                  },
+                  {
+                    "name": "AzureBastionSubnet",
+                    "properties": {
+                      "addressPrefix": "[parameters('paramBastionSubnetRange')]"
+                    }
+                  }
+                ]
+              },
+              "tags": "[parameters('paramTags')]"
+            }
+          ],
+          "outputs": {
+            "hubVnetId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('paramHubVnetName'))]"
+            },
+            "hubVnetName": {
+              "type": "string",
+              "value": "[parameters('paramHubVnetName')]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "virtualNetworkGateway",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "paramVnetGatewayName": {
+            "value": "vng-hub-uks-prod"
+          },
+          "paramVpnGatewayGeneration": {
+            "value": "Generation1"
+          },
+          "paramVpnGatewaySku": {
+            "value": "VpnGw1"
+          },
+          "paramVpnClientAddressPool": {
+            "value": "172.16.0.0/24"
+          },
+          "paramAadTenantId": {
+            "value": "replace with your entra tenantId"
+          },
+          "paramHubVnetName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubVnet'), '2022-09-01').outputs.hubVnetName.value]"
+          },
+          "paramLocation": {
+            "value": "[resourceGroup().location]"
+          },
+          "paramTags": {
+            "value": "[parameters('paramTags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.36.177.2456",
+              "templateHash": "6679323368736542503"
+            }
+          },
+          "parameters": {
+            "paramLocation": {
+              "type": "string"
+            },
+            "paramHubVnetName": {
+              "type": "string"
+            },
+            "paramTags": {
+              "type": "object"
+            },
+            "paramVnetGatewayName": {
+              "type": "string"
+            },
+            "paramVpnGatewayGeneration": {
+              "type": "string"
+            },
+            "paramVpnGatewaySku": {
+              "type": "string"
+            },
+            "paramVpnClientAddressPool": {
+              "type": "string"
+            },
+            "paramAadTenantId": {
+              "type": "string",
+              "metadata": {
+                "description": "Entra ID TenantID"
+              }
+            },
+            "paramAadTenantURL": {
+              "type": "string",
+              "defaultValue": "[format('https://login.microsoftonline.com/{0}/', parameters('paramAadTenantId'))]"
+            },
+            "paramAadIssuerURL": {
+              "type": "string",
+              "defaultValue": "[format('https://sts.windows.net/{0}/', parameters('paramAadTenantId'))]"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-07-01",
+              "name": "pip-vgw-prod-1",
+              "location": "[parameters('paramLocation')]",
+              "properties": {
+                "publicIPAllocationMethod": "Static"
+              },
+              "sku": {
+                "name": "Standard"
+              },
+              "tags": "[parameters('paramTags')]"
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-07-01",
+              "name": "pip-vgw-prod-2",
+              "location": "[parameters('paramLocation')]",
+              "properties": {
+                "publicIPAllocationMethod": "Static"
+              },
+              "sku": {
+                "name": "Standard"
+              },
+              "tags": "[parameters('paramTags')]"
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-07-01",
+              "name": "pip-vgw-prod-3",
+              "location": "[parameters('paramLocation')]",
+              "properties": {
+                "publicIPAllocationMethod": "Static"
+              },
+              "sku": {
+                "name": "Standard"
+              },
+              "tags": "[parameters('paramTags')]"
+            },
+            {
+              "type": "Microsoft.Network/virtualNetworkGateways",
+              "apiVersion": "2024-07-01",
+              "name": "[parameters('paramVnetGatewayName')]",
+              "location": "[parameters('paramLocation')]",
+              "properties": {
+                "activeActive": true,
+                "allowRemoteVnetTraffic": true,
+                "allowVirtualWanTraffic": true,
+                "ipConfigurations": [
+                  {
+                    "name": "vnetGateway1",
+                    "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'pip-vgw-prod-1')]"
+                      },
+                      "subnet": {
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('paramHubVnetName'), 'GatewaySubnet')]"
+                      }
+                    }
+                  },
+                  {
+                    "name": "vnetGateway2",
+                    "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'pip-vgw-prod-2')]"
+                      },
+                      "subnet": {
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('paramHubVnetName'), 'GatewaySubnet')]"
+                      }
+                    }
+                  },
+                  {
+                    "name": "vnetGateway3",
+                    "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'pip-vgw-prod-3')]"
+                      },
+                      "subnet": {
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('paramHubVnetName'), 'GatewaySubnet')]"
+                      }
+                    }
+                  }
+                ],
+                "gatewayType": "Vpn",
+                "vpnType": "RouteBased",
+                "vpnGatewayGeneration": "[parameters('paramVpnGatewayGeneration')]",
+                "sku": {
+                  "name": "[parameters('paramVpnGatewaySku')]",
+                  "tier": "[parameters('paramVpnGatewaySku')]"
+                },
+                "vpnClientConfiguration": {
+                  "vpnClientAddressPool": {
+                    "addressPrefixes": [
+                      "[parameters('paramVpnClientAddressPool')]"
+                    ]
+                  },
+                  "vpnClientProtocols": [
+                    "OpenVPN"
+                  ],
+                  "aadTenant": "[parameters('paramAadTenantURL')]",
+                  "aadAudience": "41b23e61-6c1e-4545-b367-cd054e0ed4b4",
+                  "aadIssuer": "[parameters('paramAadIssuerURL')]"
+                },
+                "enableBgp": false
+              },
+              "tags": "[parameters('paramTags')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', 'pip-vgw-prod-1')]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', 'pip-vgw-prod-2')]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', 'pip-vgw-prod-3')]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'hubVnet')]"
+      ]
+    }
+  ]
+}
