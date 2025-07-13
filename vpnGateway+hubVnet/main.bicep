@@ -31,7 +31,7 @@ module virtualNetworkGateway 'module-virtualNetworkGateway.bicep' = {
     paramVpnGatewaySku:        'VpnGw1'
     paramVpnClientAddressPool: '172.16.0.0/24'
 
-    paramAadTenantId:          '970b9027-1298-479c-8ade-f396586b719c'
+    paramAadTenantId:          'aad/entra tenant id'
 
     paramHubVnetName: hubVnet.outputs.hubVnetName
     paramLocation: resourceGroup().location
